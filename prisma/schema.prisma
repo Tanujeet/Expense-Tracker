@@ -6,10 +6,84 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+
+model UserProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique // Clerk userId
+  name      String?
+  email     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses  Expense[]
+}
+
+model Expense {
+  id          String    @id @default(cuid())
+  userId      String
+  amount      Float
+  categoryId  String
+  description String?
+  date        DateTime  @default(now())
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  category    Category  @relation(fields: [categoryId], references: [id])
+  userProfile UserProfile @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
+  @@index([categoryId])
+}
+
+model Category {
+  id        String             @id @default(cuid())
+  name      String
+  icon      String?            // Optional: store emoji/icon name
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  expenses          Expense[]
+  recurringExpenses RecurringExpense[]
+  budgets           Budget[]
+}
+
+model RecurringExpense {
+  id          String    @id @default(cuid())
+  userId      String
+  amount      Float
+  categoryId  String
+  description String?
+  interval    String    // daily, weekly, monthly, yearly
+  startDate   DateTime
+  endDate     DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  category    Category  @relation(fields: [categoryId], references: [id])
+}
+
+model Budget {
+  id         String    @id @default(cuid())
+  userId     String
+  categoryId String
+  limit      Float
+  startDate  DateTime
+  endDate    DateTime
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  category   Category  @relation(fields: [categoryId], references: [id])
 }
