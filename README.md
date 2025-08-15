@@ -15,16 +15,6 @@ A simple expense tracking app built with **Next.js**, **Prisma**, and **PostgreS
 - PostgreSQL
 - Tailwind CSS
 
-## 📦 API Routes
-/api/auth/register - POST register
-/api/auth/login - POST login
-/api/auth/me - GET user info
-/api/expenses - GET/POST expenses
-/api/expenses/[id] - GET/PUT/DELETE expense
-/api/stats - GET stats
-/api/export - GET CSV export
-
-
 ## ⚙️ Setup
 ```bash
 git clone <repo-url>
