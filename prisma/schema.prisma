@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,47 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model UserProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique // Clerk userId
+  id        String    @id @default(cuid())
+  userId    String    @unique
   name      String?
-  email     String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  email     String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   expenses  Expense[]
 }
 
 model Expense {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   userId      String
   amount      Float
   categoryId  String
   description String?
-  date        DateTime  @default(now())
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  // Relations
-  category    Category  @relation(fields: [categoryId], references: [id])
+  date        DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  category    Category    @relation(fields: [categoryId], references: [id])
   userProfile UserProfile @relation(fields: [userId], references: [userId])
 
-  @@index([userId])
   @@index([categoryId])
+  @@index([userId])
 }
 
 model Category {
-  id        String             @id @default(cuid())
-  name      String
-  icon      String?            // Optional: store emoji/icon name
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-
+  id                String             @id @default(cuid())
+  name              String
+  icon              String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  budgets           Budget[]
   expenses          Expense[]
   recurringExpenses RecurringExpense[]
-  budgets           Budget[]
 }
 
 model RecurringExpense {
@@ -62,28 +50,22 @@ model RecurringExpense {
   amount      Float
   categoryId  String
   description String?
-  interval    String    // daily, weekly, monthly, yearly
+  interval    String
   startDate   DateTime
   endDate     DateTime?
-
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  // Relations
   category    Category  @relation(fields: [categoryId], references: [id])
 }
 
 model Budget {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   userId     String
   categoryId String
   limit      Float
   startDate  DateTime
   endDate    DateTime
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  // Relations
-  category   Category  @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id])
 }
