@@ -11,7 +11,6 @@ export async function GET(req: Request) {
 
   try {
     const findCategory = await prisma.category.findMany({
-      where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
