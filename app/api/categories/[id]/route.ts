@@ -27,3 +27,60 @@ export async function GET(
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
+export async function PATCH(
+  req: Request,
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
+) {
+  const { userId } = await auth();
+  if (!userId) {
+    return new NextResponse("Unauthorised", { status: 403 });
+  }
+
+  const { id } = await paramsPromise;
+  const { name, icon } = await req.json();
+
+  if (!name) {
+    return new NextResponse("Name doest exist", { status: 404 });
+  }
+
+  try {
+    const category = await prisma.category.findUnique({
+      where: { id },
+    });
+    if (!category) {
+      return new NextResponse("Category not found", { status: 404 });
+    }
+
+    if (category.userId !== userId) {
+      return new NextResponse("Unauthorised", { status: 403 });
+    }
+
+    const updatedCategory = await prisma.category.update({
+      where: { id },
+      data: { name, icon },
+    });
+
+    return NextResponse.json(updatedCategory);
+  } catch (e) {
+    console.error("Failed to update categories", e);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
+) {
+  const { userId } = await auth();
+  if (!userId) {
+    return new NextResponse("Unauthorised", { status: 403 });
+  }
+  const { id } = await paramsPromise;
+
+  try {
+  } catch (e) {
+    console.error("Failed to delete categories", e);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}
