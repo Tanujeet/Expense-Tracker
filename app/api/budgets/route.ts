@@ -8,36 +8,46 @@ export async function GET(req: Request) {
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
+
   try {
-    const getBudget = await prisma.budget.findMany({
-      where: { userId: userId },
+    const budgets = await prisma.budget.findMany({
+      where: { userId },
       include: { category: true },
     });
 
-    for (const budget of getBudget) {
-      const expenses = await prisma.expense.aggregate({
-        _sum: { amount: true },
-        where: {
-          userId,
-          categoryId: budget.categoryId, // yaha error nahi aayega ab
-          date: {
-            gte: budget.startDate,
-            lte: budget.endDate,
+    // Promise.all for parallel queries
+    const budgetsWithRemaining = await Promise.all(
+      budgets.map(async (budget) => {
+        const expenses = await prisma.expense.aggregate({
+          _sum: { amount: true },
+          where: {
+            userId,
+            categoryId: budget.categoryId,
+            date: {
+              gte: budget.startDate,
+              lte: budget.endDate,
+            },
           },
-        },
-      });
+        });
 
-      console.log(
-        `Category: ${budget.category.name}, Remaining: ${
-          budget.limit - (expenses._sum.amount ?? 0)
-        }`
-      );
-    }
+        const totalSpent = expenses._sum.amount ?? 0;
+        const remaining = budget.limit - totalSpent;
+
+        return {
+          ...budget,
+          totalSpent,
+          remainingBudget: remaining,
+        };
+      })
+    );
+
+    return NextResponse.json(budgetsWithRemaining);
   } catch (e) {
     console.error("Failed to get budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
 
 
 
