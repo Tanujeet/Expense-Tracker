@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { waitForDebugger } from "inspector";
+
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -71,8 +71,21 @@ export async function DELETE(
   if (!userId) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
+
   const { id } = await paramsPromise;
+
   try {
+    const budget = await prisma.budget.findUnique({ where: { id } });
+
+    if (!budget || budget.userId !== userId) {
+      return new NextResponse("Not Found or Unauthorized", { status: 404 });
+    }
+
+    const deleteBudget = await prisma.budget.delete({
+      where: { id, userId },
+    });
+
+    return NextResponse.json(deleteBudget);
   } catch (e) {
     console.error("Failet to delete budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
