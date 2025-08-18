@@ -16,6 +16,10 @@ export async function GET(
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
+
+
+
 export async function PATCH(
   req: Request,
   { params: paramsPromise }: { params: Promise<{ id: string }> }
@@ -27,10 +31,11 @@ export async function PATCH(
   const { id } = await paramsPromise;
   try {
   } catch (e) {
-    console.error("Failet to get one budget", e);
+    console.error("Failet to update budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
   { params: paramsPromise }: { params: Promise<{ id: string }> }
@@ -42,7 +47,7 @@ export async function DELETE(
   const { id } = await paramsPromise;
   try {
   } catch (e) {
-    console.error("Failet to get one budget", e);
+    console.error("Failet to delete budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
