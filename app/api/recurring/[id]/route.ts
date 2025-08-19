@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { detectConflictingPaths } from "next/dist/build/utils";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -37,8 +36,30 @@ export async function PATCH(
     return new NextResponse("Unauthorized", { status: 403 });
   }
   const { id } = await paramsPromise;
+  const { categoryId, amount, description, interval, startDate, endDate } =
+    await req.json();
 
   try {
+    const expense = await prisma.recurringExpense.findUnique({
+      where: { id },
+    });
+
+    if (!expense || expense.userId !== userId) {
+      return new NextResponse("Expense not found", { status: 404 });
+    }
+
+    const updateRecurringExpense = await prisma.recurringExpense.update({
+      where: { id },
+      data: {
+        categoryId: categoryId ?? expense.categoryId,
+        amount: amount ?? expense.amount,
+        description: description ?? expense.description,
+        interval: interval ?? expense.interval,
+        startDate: startDate ?? expense.startDate,
+        endDate: endDate ?? expense.endDate,
+      },
+    });
+    return NextResponse.json(updateRecurringExpense);
   } catch (e) {
     console.error("Failed to Update budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
