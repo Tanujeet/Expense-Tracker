@@ -56,7 +56,32 @@ export async function PATCH(
     return new NextResponse("Unauthorized", { status: 403 });
   }
   const { id } = await paramsPromise;
+  const { limit, startDate, endDate, categoryId } = await req.json();
+
   try {
+    const existingBudget = await prisma.budget.findUnique({
+      where: { id },
+    });
+
+    if (!existingBudget) {
+      return new NextResponse("Budget not found", { status: 404 });
+    }
+
+    if (existingBudget.userId !== userId) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    const updateBudget = await prisma.budget.update({
+      where: { id },
+      data: {
+        ...(limit !== undefined && { limit }),
+        ...(startDate !== undefined && { startDate }),
+        ...(endDate !== undefined && { endDate }),
+        ...(categoryId !== undefined && { categoryId }),
+      },
+    });
+
+    return NextResponse.json(updateBudget);
   } catch (e) {
     console.error("Failet to update budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
