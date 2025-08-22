@@ -77,7 +77,7 @@ export async function GET(req: Request) {
           startDate: budget.startDate,
           endDate: budget.endDate,
         };
-      })
+      }),
     );
 
     return NextResponse.json(summaries);

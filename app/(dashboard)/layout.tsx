@@ -1,5 +1,11 @@
+import Sidebarnav from "@/components/sidebarnav";
+
 const Layout = () => {
-  return <div>Layout</div>;
+  return (
+    <aside>
+      <Sidebarnav />
+    </aside>
+  );
 };
 
 export default Layout;

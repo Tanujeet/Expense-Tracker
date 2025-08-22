@@ -8,7 +8,7 @@ export async function GET(
     params: paramsPromise,
   }: {
     params: Promise<{ id: string }>;
-  }
+  },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -32,7 +32,7 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -64,7 +64,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {

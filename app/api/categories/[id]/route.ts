@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -30,7 +30,7 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -70,7 +70,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -78,25 +78,25 @@ export async function DELETE(
   }
   const { id } = await paramsPromise;
 
-    try {
-      const category = await prisma.category.findUnique({
-        where: { id },
-      });
-      if (!category) {
-        return new NextResponse("Category not found", { status: 404 });
-      }
-
-      if (category.userId !== userId) {
-        return new NextResponse("Unauthorised", { status: 403 });
-      }
-
-      const deleteCategory = await prisma.category.delete({
-        where: { id },
-      });
-
-      return NextResponse.json(deleteCategory);
-    } catch (e) {
-      console.error("Failed to delete categories", e);
-      return new NextResponse("Internal Server Error", { status: 500 });
+  try {
+    const category = await prisma.category.findUnique({
+      where: { id },
+    });
+    if (!category) {
+      return new NextResponse("Category not found", { status: 404 });
     }
+
+    if (category.userId !== userId) {
+      return new NextResponse("Unauthorised", { status: 403 });
+    }
+
+    const deleteCategory = await prisma.category.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(deleteCategory);
+  } catch (e) {
+    console.error("Failed to delete categories", e);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
 }

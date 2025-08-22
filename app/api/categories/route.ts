@@ -10,10 +10,10 @@ export async function GET(req: Request) {
   }
 
   try {
-      const findCategory = await prisma.category.findMany({
-        where: { userId },
-        orderBy: { createdAt: "desc" },
-      });
+    const findCategory = await prisma.category.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
 
     return NextResponse.json(findCategory);
   } catch (e) {
@@ -27,23 +27,23 @@ export async function POST(req: Request) {
   if (!userId) {
     return new NextResponse("Unauthorised", { status: 403 });
   }
-    const { name, icon } = await req.json();
+  const { name, icon } = await req.json();
 
-    if (!name) {
-      return new NextResponse("Name is required", { status: 404 });
-    }
+  if (!name) {
+    return new NextResponse("Name is required", { status: 404 });
+  }
 
-    try {
-      const createCategories = await prisma.category.create({
-        data: {
-          name,
-          icon,
-          userId,
-        },
-      });
-      return NextResponse.json(createCategories);
-    } catch (e) {
-      console.error("Failed to fetch expense", e);
-      return new NextResponse("Internal Server Error", { status: 500 });
-    }
+  try {
+    const createCategories = await prisma.category.create({
+      data: {
+        name,
+        icon,
+        userId,
+      },
+    });
+    return NextResponse.json(createCategories);
+  } catch (e) {
+    console.error("Failed to fetch expense", e);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
 }

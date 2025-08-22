@@ -38,7 +38,7 @@ export async function GET(req: Request) {
           totalSpent,
           remainingBudget: remaining,
         };
-      })
+      }),
     );
 
     return NextResponse.json(budgetsWithRemaining);

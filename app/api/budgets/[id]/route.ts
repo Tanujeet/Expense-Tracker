@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -49,7 +49,7 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
@@ -90,7 +90,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> },
 ) {
   const { userId } = await auth();
   if (!userId) {
