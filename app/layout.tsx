@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Sidebarnav from "@/components/sidebarnav";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
         >
           <Navbar />
           <div className="flex">
+            <Sidebarnav />
             <main className="flex-1 min-h-[calc(100vh-4rem)] p-6">
               {children}
             </main>
