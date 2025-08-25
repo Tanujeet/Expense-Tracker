@@ -136,8 +136,9 @@ const Page = () => {
               {mode === "add" ? "Add New Budget" : "Edit Budget"}
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              {mode == "add"
+                ? "Create a new budget to track your spending."
+                : "Make changes to your existing budget."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
