@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -51,10 +50,10 @@ const Page = () => {
           <h1 className="font-bold text-3xl">Budgets</h1>
           <Button className="rounded-xl px-4 py-2 shadow-md">Add Budget</Button>
         </div>
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {budgetData.map((data, idx) => {
             const remaining = data.amount - data.spent;
-            const progress = (data.spent / data.amount) * 100;
+            const progress = Math.min((data.spent / data.amount) * 100, 100);
 
             return (
               <Card key={idx}>
