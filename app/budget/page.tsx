@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +10,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+type DialogMode = "add" | "edit" | null;
 const Page = () => {
   const budgetData = [
     {
@@ -42,13 +53,24 @@ const Page = () => {
       currency: "INR",
       maximumFractionDigits: 0,
     }).format(amount);
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<DialogMode>(null);
+  const handleOpen = (type: DialogMode) => {
+    setMode(type);
+    setOpen(true);
+  };
 
   return (
     <main className="p-6">
       <section>
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-bold text-3xl">Budgets</h1>
-          <Button className="rounded-xl px-4 py-2 shadow-md">Add Budget</Button>
+          <Button
+            className="rounded-xl px-4 py-2 shadow-md"
+            onClick={() => handleOpen("add")}
+          >
+            Add Budget
+          </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {budgetData.map((data, idx) => {
@@ -91,7 +113,11 @@ const Page = () => {
                 </CardContent>
 
                 <CardFooter className="justify-end">
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpen("edit")}
+                  >
                     Edit
                   </Button>
                   <Button variant="ghost" size="sm" className="text-red-500">
@@ -103,6 +129,24 @@ const Page = () => {
           })}
         </div>
       </section>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {mode === "add" ? "Add New Budget" : "Edit Budget"}
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setOpen(false)}>
+              {mode === "add" ? "Add" : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 };
