@@ -19,7 +19,7 @@ const Page = () => {
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A78BFA"];
   return (
     <main>
-      <section>
+      <section className="mt-10">
         <div className="grid grid-cols-3 gap-6 mt-7">
           {data.map((datas, idx) => (
             <div key={idx}>
@@ -35,7 +35,7 @@ const Page = () => {
           ))}
         </div>
       </section>
-      <section className="mt-10">
+      <section className="mt-20">
         <div className="flex gap-7">
           <Card className="w-[500px]">
             <CardHeader>
