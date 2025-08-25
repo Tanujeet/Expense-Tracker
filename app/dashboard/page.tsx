@@ -48,8 +48,12 @@ const Page = () => {
             </CardContent>
           </Card>
           <Card className="w-[400px]">
-            <div className="h-64 bg-white rounded-2xl p-3">
-              <h2 className="text-2xl font-bold">Spending by Category</h2>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">
+                Spending by Category
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -61,22 +65,17 @@ const Page = () => {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {datas.map(
-                      (
-                        entry,
-                        index // ✅ yahan bhi datas.map
-                      ) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      )
-                    )}
+                    {datas.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </CardContent>
           </Card>
         </div>
       </section>
