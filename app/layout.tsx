@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Sidebarnav from "@/components/sidebarnav";
+import Providers from "./providers";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -31,13 +32,15 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f9f9f9]`}
         >
-          <Navbar />
-          <div className="flex">
-            <Sidebarnav />
-            <main className="flex-1 min-h-[calc(100vh-4rem)] p-6">
-              {children}
-            </main>
-          </div>
+          <Providers>
+            <Navbar />
+            <div className="flex">
+              <Sidebarnav />
+              <main className="flex-1 min-h-[calc(100vh-4rem)] p-6">
+                {children}
+              </main>
+            </div>
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

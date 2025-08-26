@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         endDate: endDate,
       },
     });
-
+    console.log({ limit, endDate, startDate, categoryId });
     return NextResponse.json(newBudget);
   } catch (e) {
     console.error("Failed to create budget", e);

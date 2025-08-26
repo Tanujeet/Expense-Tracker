@@ -31,8 +31,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { axiosInstance } from "@/lib/axios";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 type DialogMode = "add" | "edit" | null;
+
+type Budget = {
+  id: string;
+  name: string;
+  amount: number;
+  spent: number;
+  category: string;
+};
 
 const budgetSchema = z.object({
   id: z.string().optional(),
@@ -43,7 +53,7 @@ const budgetSchema = z.object({
     .number()
     .positive({ message: "Amount must be a positive number." }),
   category: z.string().min(1, { message: "Please select a category." }),
-  spent: z.coerce.number().min(0).optional(), // Not in form, but part of data
+  spent: z.coerce.number().min(0).optional(),
 });
 
 const formatCurrency = (amount: number) =>
@@ -56,27 +66,48 @@ const formatCurrency = (amount: number) =>
 const Page = () => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<DialogMode>(null);
+  const queryClient = useQueryClient();
 
-  const budgetData = [
-    {
-      heading: "Monthly groceries",
-      desc: "Food",
-      spent: 700,
-      amount: 1000,
+  // ✅ Budgets
+  const { data: budgets } = useQuery<Budget[]>({
+    queryKey: ["budgets"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/budgets");
+      return res.data.map((b: any) => ({
+        id: b.id,
+        name: b.name,
+        amount: b.limit, // backend field -> frontend field
+        spent: b.spent ?? 0,
+        category: b.category?.name ?? "",
+      }));
     },
-    {
-      heading: "Online shopping",
-      desc: "Shopping",
-      spent: 1500,
-      amount: 3000,
+  });
+
+  // ✅ Categories
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/categories");
+      return res.data;
     },
-    {
-      heading: "Fuel Transport",
-      desc: "Transport",
-      spent: 600,
-      amount: 100,
+  });
+
+  // ✅ Add Budget mutation
+  const addBudgetMutation = useMutation({
+    mutationFn: async (newBudget: z.infer<typeof budgetSchema>) => {
+      const res = await axiosInstance.post("/budgets", {
+        categoryId: newBudget.category, // 👈 this is id
+        limit: newBudget.amount, // backend expects limit
+        startDate: new Date(),
+        endDate: new Date(),
+      });
+      return res.data;
     },
-  ];
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      setOpen(false);
+    },
+  });
 
   const handleOpen = (type: DialogMode) => {
     setMode(type);
@@ -84,8 +115,12 @@ const Page = () => {
   };
 
   function onSubmit(values: z.infer<typeof budgetSchema>) {
-    console.log("Form Submitted:", values);
-    setOpen(false);
+    addBudgetMutation.mutate({
+      name: values.name,
+      amount: values.amount,
+      category: values.category, // 👈 id
+      spent: values.spent ?? 0,
+    });
   }
 
   return (
@@ -103,19 +138,18 @@ const Page = () => {
 
       {/* Budget Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {budgetData.map((data, idx) => {
-          const remaining = data.amount - data.spent;
-          const progress = Math.min((data.spent / data.amount) * 100, 100);
+        {budgets?.map((budget, idx) => {
+          const remaining = budget.amount - budget.spent;
+          const progress = Math.min((budget.spent / budget.amount) * 100, 100);
 
           return (
             <Card key={idx}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
-                  {data.heading}
+                  {budget.name}
                 </CardTitle>
-                <CardDescription>{data.desc}</CardDescription>
+                <CardDescription>{budget.category}</CardDescription>
               </CardHeader>
-
               <CardContent className="flex-grow">
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -124,8 +158,8 @@ const Page = () => {
                       <span>Total</span>
                     </div>
                     <div className="flex justify-between font-semibold">
-                      <span>{formatCurrency(data.spent)}</span>
-                      <span>{formatCurrency(data.amount)}</span>
+                      <span>{formatCurrency(budget.spent)}</span>
+                      <span>{formatCurrency(budget.amount)}</span>
                     </div>
                     <Progress value={progress} className="mt-2" />
                   </div>
@@ -173,7 +207,7 @@ const Page = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <BudgetForm onSubmit={onSubmit} />
+          <BudgetForm onSubmit={onSubmit} categories={categories ?? []} />
         </DialogContent>
       </Dialog>
     </main>
@@ -182,8 +216,10 @@ const Page = () => {
 
 function BudgetForm({
   onSubmit,
+  categories,
 }: {
   onSubmit: (values: z.infer<typeof budgetSchema>) => void;
+  categories: any[];
 }) {
   const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema) as any,
@@ -240,11 +276,11 @@ function BudgetForm({
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
                   <option value="">Select a category</option>
-                  <option value="Food">Food</option>
-                  <option value="Shopping">Shopping</option>
-                  <option value="Transport">Transport</option>
-                  <option value="Utilities">Utilities</option>
-                  <option value="Entertainment">Entertainment</option>
+                  {categories.map((cat: any) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
               </FormControl>
               <FormMessage />
@@ -252,7 +288,7 @@ function BudgetForm({
           )}
         />
 
-        {/* Submit Button */}
+        {/* Submit */}
         <DialogFooter>
           <Button type="submit">Save</Button>
         </DialogFooter>
