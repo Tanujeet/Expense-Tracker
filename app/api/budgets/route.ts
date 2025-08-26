@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
-  const { limit, endDate, startDate, categoryId } = await req.json();
+  const { limit, endDate, startDate, categoryId, name } = await req.json();
   try {
     const newBudget = await prisma.budget.create({
       data: {
@@ -63,6 +63,7 @@ export async function POST(req: Request) {
         limit: limit,
         startDate: startDate,
         endDate: endDate,
+        name: name,
       },
     });
     console.log({ limit, endDate, startDate, categoryId });

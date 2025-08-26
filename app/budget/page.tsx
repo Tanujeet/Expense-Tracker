@@ -97,6 +97,7 @@ const { data: categories } = useQuery({
   const addBudgetMutation = useMutation({
     mutationFn: async (newBudget: z.infer<typeof budgetSchema>) => {
       const res = await axiosInstance.post("/budgets", {
+        name: newBudget.name,
         categoryId: newBudget.category, // 👈 this is id
         limit: newBudget.amount, // backend expects limit
         startDate: new Date(),
