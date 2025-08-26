@@ -84,13 +84,14 @@ const Page = () => {
   });
 
   // ✅ Categories
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await axiosInstance.get("/categories");
-      return res.data;
-    },
-  });
+const { data: categories } = useQuery({
+  queryKey: ["categories"],
+  queryFn: async () => {
+    const res = await axiosInstance.get("/categories");
+    console.log("Fetched categories:", res.data); // ✅ ye check karo
+    return res.data;
+  },
+});
 
   // ✅ Add Budget mutation
   const addBudgetMutation = useMutation({
