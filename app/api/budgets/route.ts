@@ -31,14 +31,15 @@ export async function GET(req: Request) {
         });
 
         const totalSpent = expenses._sum.amount ?? 0;
-        const remaining = budget.limit - totalSpent;
+        const limit = budget.limit ?? 0; // safe default
+        const remaining = Number(limit) - Number(totalSpent);
 
         return {
           ...budget,
           totalSpent,
           remainingBudget: remaining,
         };
-      }),
+      })
     );
 
     return NextResponse.json(budgetsWithRemaining);
@@ -58,16 +59,22 @@ export async function POST(req: Request) {
   try {
     const newBudget = await prisma.budget.create({
       data: {
-        userId: userId,
-        categoryId: categoryId,
-        limit: limit,
-        startDate: startDate,
-        endDate: endDate,
-        name: name,
+        userId,
+        categoryId,
+        limit,
+        startDate,
+        endDate,
+        name,
       },
+      include: { category: true },
     });
-    console.log({ limit, endDate, startDate, categoryId });
-    return NextResponse.json(newBudget);
+
+    // default creation me koi expense nahi hoga, par consistency ke liye:
+    return NextResponse.json({
+      ...newBudget,
+      totalSpent: 0,
+      remainingBudget: limit,
+    });
   } catch (e) {
     console.error("Failed to create budget", e);
     return new NextResponse("Internal Server Error", { status: 500 });
