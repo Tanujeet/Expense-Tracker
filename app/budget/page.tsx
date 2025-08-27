@@ -39,6 +39,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useEffect, useState } from "react";
 import { axiosInstance } from "@/lib/axios";
+import { Spinner } from "@/components/spinner";
 
 // ------------------ Types ------------------
 type Budget = {
@@ -135,7 +136,7 @@ export default function BudgetDashboard() {
     saveBudgetMutation.mutate(values);
   };
 
-  if (isLoading) return <div>Loading budgets...</div>;
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="p-6">
