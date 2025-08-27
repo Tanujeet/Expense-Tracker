@@ -56,7 +56,7 @@ export async function PATCH(
     return new NextResponse("Unauthorized", { status: 403 });
   }
   const { id } = await paramsPromise;
-  const { limit, startDate, endDate, categoryId } = await req.json();
+  const { limit, startDate, endDate, categoryId, name } = await req.json();
 
   try {
     const existingBudget = await prisma.budget.findUnique({
@@ -74,6 +74,7 @@ export async function PATCH(
     const updateBudget = await prisma.budget.update({
       where: { id },
       data: {
+        ...(name !== undefined && { name }),
         ...(limit !== undefined && { limit }),
         ...(startDate !== undefined && { startDate }),
         ...(endDate !== undefined && { endDate }),
