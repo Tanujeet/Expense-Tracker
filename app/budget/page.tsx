@@ -44,12 +44,10 @@ import { axiosInstance } from "@/lib/axios";
 type Budget = {
   id: string;
   name: string;
-  limit: number;
+  limit: number; // backend se ye aata hai
   category: { id: string; name: string };
-  amount: number;
   spent: number;
 };
-
 type DialogMode = "add" | "edit";
 
 // ------------------ Zod Schema ------------------
@@ -90,7 +88,7 @@ export default function BudgetDashboard() {
     mutationFn: async (budget: z.infer<typeof budgetSchema>) => {
       if (budget.id) {
         // Edit (PUT)
-        return axiosInstance.put(`/budgets/${budget.id}`, {
+        return axiosInstance.patch(`/budgets/${budget.id}`, {
           name: budget.name,
           limit: budget.amount,
           categoryId: budget.category,
@@ -150,8 +148,11 @@ export default function BudgetDashboard() {
       {/* Budget List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {budgets?.map((budget, idx) => {
-          const remaining = budget.amount - budget.spent;
-          const progress = Math.min((budget.spent / budget.amount) * 100, 100);
+          const remaining = budget.limit - budget.spent;
+          const progress =
+            budget.limit > 0
+              ? Math.min((budget.spent / budget.limit) * 100, 100)
+              : 0;
 
           return (
             <Card key={idx}>
@@ -170,7 +171,7 @@ export default function BudgetDashboard() {
                     </div>
                     <div className="flex justify-between font-semibold">
                       <span>{formatCurrency(budget.spent)}</span>
-                      <span>{formatCurrency(budget.amount)}</span>
+                      <span>{formatCurrency(budget.limit)}</span>
                     </div>
                     <Progress value={progress} className="mt-2" />
                   </div>
