@@ -9,19 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -31,114 +25,129 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { useEffect, useState } from "react";
 import { axiosInstance } from "@/lib/axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-type DialogMode = "add" | "edit" | null;
-
+// ------------------ Types ------------------
 type Budget = {
   id: string;
   name: string;
+  limit: number;
+  category: { id: string; name: string };
   amount: number;
   spent: number;
-  category: string;
 };
 
+type DialogMode = "add" | "edit";
+
+// ------------------ Zod Schema ------------------
 const budgetSchema = z.object({
   id: z.string().optional(),
-  name: z
-    .string()
-    .min(3, { message: "Budget name must be at least 3 characters." }),
-  amount: z.coerce
-    .number()
-    .positive({ message: "Amount must be a positive number." }),
-  category: z.string().min(1, { message: "Please select a category." }),
-  spent: z.coerce.number().min(0).optional(),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  amount: z.coerce.number().min(1, "Amount must be greater than 0"),
+  category: z.string().min(1, "Please select a category"),
+  spent: z.coerce.number().min(0).default(0),
 });
 
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-
-const Page = () => {
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<DialogMode>(null);
+// ------------------ Main Component ------------------
+export default function BudgetDashboard() {
   const queryClient = useQueryClient();
 
-  // ✅ Budgets
-  const { data: budgets } = useQuery<Budget[]>({
+  const { data: budgets, isLoading } = useQuery<Budget[]>({
     queryKey: ["budgets"],
     queryFn: async () => {
       const res = await axiosInstance.get("/budgets");
-      return res.data.map((b: any) => ({
-        id: b.id,
-        name: b.name,
-        amount: b.limit, // backend field -> frontend field
-        spent: b.spent ?? 0,
-        category: b.category?.name ?? "",
-      }));
+      return res.data;
     },
   });
 
-  // ✅ Categories
-const { data: categories } = useQuery({
-  queryKey: ["categories"],
-  queryFn: async () => {
-    const res = await axiosInstance.get("/categories");
-    console.log("Fetched categories:", res.data); // ✅ ye check karo
-    return res.data;
-  },
-});
-
-  // ✅ Add Budget mutation
-  const addBudgetMutation = useMutation({
-    mutationFn: async (newBudget: z.infer<typeof budgetSchema>) => {
-      const res = await axiosInstance.post("/budgets", {
-        name: newBudget.name,
-        categoryId: newBudget.category, // 👈 this is id
-        limit: newBudget.amount, // backend expects limit
-        startDate: new Date(),
-        endDate: new Date(),
-      });
+  const { data: categories } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/categories");
       return res.data;
+    },
+  });
+
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<DialogMode>("add");
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+
+  // ------------------ Mutations ------------------
+  const saveBudgetMutation = useMutation({
+    mutationFn: async (budget: z.infer<typeof budgetSchema>) => {
+      if (budget.id) {
+        // Edit (PUT)
+        return axiosInstance.put(`/budgets/${budget.id}`, {
+          name: budget.name,
+          limit: budget.amount,
+          categoryId: budget.category,
+        });
+      } else {
+        // Add (POST)
+        return axiosInstance.post("/budgets", {
+          name: budget.name,
+          limit: budget.amount,
+          categoryId: budget.category,
+          startDate: new Date(),
+          endDate: new Date(),
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
+
       setOpen(false);
     },
   });
 
-  const handleOpen = (type: DialogMode) => {
+  const deleteBudgetMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return axiosInstance.delete(`/budgets/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+    },
+  });
+
+  // ------------------ Handlers ------------------
+  const handleOpen = (type: DialogMode, budget?: Budget) => {
     setMode(type);
+    if (type === "edit" && budget) {
+      setSelectedBudget(budget);
+    } else {
+      setSelectedBudget(null);
+    }
     setOpen(true);
   };
 
-  function onSubmit(values: z.infer<typeof budgetSchema>) {
-    addBudgetMutation.mutate({
-      name: values.name,
-      amount: values.amount,
-      category: values.category, // 👈 id
-      spent: values.spent ?? 0,
-    });
-  }
+  const onSubmit = (values: z.infer<typeof budgetSchema>) => {
+    saveBudgetMutation.mutate(values);
+  };
+
+  if (isLoading) return <div>Loading budgets...</div>;
 
   return (
-    <main className="p-6">
+    <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-bold text-3xl">Budgets</h1>
-        <Button
-          className="rounded-xl px-4 py-2 shadow-md"
-          onClick={() => handleOpen("add")}
-        >
-          Add Budget
-        </Button>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Budgets</h1>
+        <Button onClick={() => handleOpen("add")}>+ Add Budget</Button>
       </div>
 
-      {/* Budget Cards */}
+      {/* Budget List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {budgets?.map((budget, idx) => {
           const remaining = budget.amount - budget.spent;
@@ -150,7 +159,7 @@ const { data: categories } = useQuery({
                 <CardTitle className="font-bold text-2xl">
                   {budget.name}
                 </CardTitle>
-                <CardDescription>{budget.category}</CardDescription>
+                <CardDescription>{budget.category.name}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
                 <div className="space-y-4">
@@ -182,11 +191,17 @@ const { data: categories } = useQuery({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleOpen("edit")}
+                  onClick={() => handleOpen("edit", budget)}
                 >
                   Edit
                 </Button>
-                <Button variant="ghost" size="sm" className="text-red-500">
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-500"
+                  onClick={() => deleteBudgetMutation.mutate(budget.id)}
+                >
                   Delete
                 </Button>
               </CardFooter>
@@ -195,33 +210,34 @@ const { data: categories } = useQuery({
         })}
       </div>
 
-      {/* Dialog Form */}
+      {/* Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {mode === "add" ? "Add New Budget" : "Edit Budget"}
             </DialogTitle>
-            <DialogDescription>
-              {mode === "add"
-                ? "Create a new budget to track your spending."
-                : "Make changes to your existing budget."}
-            </DialogDescription>
           </DialogHeader>
-
-          <BudgetForm onSubmit={onSubmit} categories={categories ?? []} />
+          <BudgetForm
+            onSubmit={onSubmit}
+            categories={categories ?? []}
+            budget={selectedBudget}
+          />
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
-};
+}
 
+// ------------------ Budget Form ------------------
 function BudgetForm({
   onSubmit,
   categories,
+  budget,
 }: {
   onSubmit: (values: z.infer<typeof budgetSchema>) => void;
-  categories: any[];
+  categories: { id: string; name: string }[];
+  budget: Budget | null;
 }) {
   const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema) as any,
@@ -232,18 +248,38 @@ function BudgetForm({
     },
   });
 
+  // reset form when budget (edit mode) changes
+  useEffect(() => {
+    if (budget) {
+      form.reset({
+        id: budget.id,
+        name: budget.name,
+        amount: budget.limit,
+        category: budget.category.id,
+        spent: budget.spent,
+      });
+    } else {
+      form.reset({
+        name: "",
+        amount: 0,
+        category: "",
+        spent: 0,
+      });
+    }
+  }, [budget, form]);
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Budget Name */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Name */}
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Budget Name</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g Monthly Expense" {...field} />
+                <Input placeholder="e.g., Monthly Groceries" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -256,9 +292,9 @@ function BudgetForm({
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Total Amount</FormLabel>
+              <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="e.g 5000" {...field} />
+                <Input type="number" placeholder="Enter amount" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -272,31 +308,37 @@ function BudgetForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <FormControl>
-                <select
-                  {...field}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((cat: any) => (
-                    <option key={cat.id} value={cat.id}>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </FormControl>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Submit */}
-        <DialogFooter>
-          <Button type="submit">Save</Button>
-        </DialogFooter>
+        <Button type="submit" className="w-full">
+          Save Budget
+        </Button>
       </form>
     </Form>
   );
 }
 
-export default Page;
+// ------------------ Utils ------------------
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
