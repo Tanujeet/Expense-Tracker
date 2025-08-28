@@ -36,10 +36,10 @@ export async function GET(req: Request) {
 
         return {
           ...budget,
-          totalSpent,
+          spent: totalSpent,
           remainingBudget: remaining,
         };
-      })
+      }),
     );
 
     return NextResponse.json(budgetsWithRemaining);
