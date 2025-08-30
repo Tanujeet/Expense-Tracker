@@ -94,7 +94,7 @@ const Page = () => {
               {expensesData.map((datas, idx) => (
                 <TableRow
                   key={idx}
-                  className="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="transition-all duration-300 cursor-pointer hover:bg-black hover:[&>*]:text-white"
                 >
                   <TableCell className="p-3 font-medium text-gray-800">
                     {datas.date}
