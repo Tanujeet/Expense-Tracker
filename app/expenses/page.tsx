@@ -47,11 +47,12 @@ const Page = () => {
   ];
 
   // Backend Api Calls //
+  // useEffect me loadCategories function me change:
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const res = await axiosInstance.get("/categories");
-        setCategories(res.data);
+        setCategories(res.data.data); // ✅ directly categories array set kar
       } catch (e) {
         console.error("Failed to load categories", e);
       }

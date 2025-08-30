@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import next from "next";
+
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -32,6 +32,10 @@ export async function GET(req: Request) {
     const getExpense = await prisma.expense.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        category: true,
+      },
     });
 
     return NextResponse.json(getExpense);
@@ -60,7 +64,7 @@ export async function POST(req: Request) {
         amount,
         categoryId,
         description: description || "",
-        date: date ? new date(date) : new date(),
+        date: date ? new Date(date) : new Date(),
       },
     });
     return NextResponse.json(newExpense);
