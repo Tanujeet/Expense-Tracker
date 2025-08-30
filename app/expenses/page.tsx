@@ -82,7 +82,7 @@ const Page = () => {
               </TableRow>
             </TableHeader>
             {expensesData.map((datas, idx) => (
-              <TableBody>
+              <TableBody key={idx}>
                 <TableRow>
                   <TableCell className="font-medium">{datas.date}</TableCell>
                   <TableCell>{datas.category.name}</TableCell>
@@ -93,9 +93,12 @@ const Page = () => {
             ))}
           </Table>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-10 w-[900px]">
+        <div className="mt-10 grid grid-cols-2 gap-10 lg:w-[900px] lg:ml-10 2xl:w-[1500px] 2xl:ml-10 ">
           {transactionData.map((trans, idx) => (
-            <Card key={idx}>
+            <Card
+              key={idx}
+              className="transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer hover:bg-black hover:text-white"
+            >
               <CardHeader>
                 <CardTitle className="font-black text-3xl">
                   {trans.heading}
