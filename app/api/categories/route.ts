@@ -1,17 +1,15 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { NextResponse } from "next/server";
-
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorised", { status: 403 });
+  if (!userId) return new NextResponse("Unauthorized", { status: 403 });
 
   try {
     let categories = await prisma.category.findMany({ where: { userId } });
 
     if (categories.length === 0) {
-      // Create default categories lazily
       const defaultCategories = [
         { name: "Food", icon: "🍔" },
         { name: "Transport", icon: "🚌" },
@@ -20,42 +18,40 @@ export async function GET(req: Request) {
         { name: "Entertainment", icon: "🎬" },
       ];
 
-      for (const cat of defaultCategories) {
-        await prisma.category.create({ data: { ...cat, userId } });
-      }
+      await prisma.category.createMany({
+        data: defaultCategories.map((cat) => ({ ...cat, userId })),
+      });
 
       categories = await prisma.category.findMany({ where: { userId } });
     }
 
-    return NextResponse.json(categories);
+    return NextResponse.json({ success: true, data: categories });
   } catch (e) {
     console.error("Failed to fetch categories", e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
-    return new NextResponse("Unauthorised", { status: 403 });
+    return new NextResponse("Unauthorized", { status: 403 });
   }
+
   const { name, icon } = await req.json();
 
   if (!name) {
-    return new NextResponse("Name is required", { status: 404 });
+    return new NextResponse("Name is required", { status: 400 });
   }
 
   try {
-    const createCategories = await prisma.category.create({
-      data: {
-        name,
-        icon,
-        userId,
-      },
+    const category = await prisma.category.create({
+      data: { name, icon, userId },
     });
-    return NextResponse.json(createCategories);
+
+    return NextResponse.json({ success: true, data: category });
   } catch (e) {
-    console.error("Failed to fetch expense", e);
+    console.error("Failed to create category", e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

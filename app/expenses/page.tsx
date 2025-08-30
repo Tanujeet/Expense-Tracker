@@ -1,24 +1,30 @@
+"use client";
+
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 const Page = () => {
-  const expensesData = [
+  const [expensesData, setExpensesData] = useState([
     {
       date: "2025-08-28",
       category: { name: "Groceries", color: "#10b981" },
@@ -31,45 +37,108 @@ const Page = () => {
       description: "Monthly paycheck",
       amount: 150000.0,
     },
-    {
-      date: "2025-08-27",
-      category: { name: "Transport", color: "#f59e0b" },
-      description: "Ride sharing service to airport",
-      amount: -1250.0,
-    },
-    {
-      date: "2025-08-26",
-      category: { name: "Dining Out", color: "#ef4444" },
-      description: "Dinner with friends at The Place",
-      amount: -3200.0,
-    },
-    {
-      date: "2025-08-25",
-      category: { name: "Utilities", color: "#3b82f6" },
-      description: "Electricity & Water Bill",
-      amount: -4500.25,
-    },
-    {
-      date: "2025-08-24",
-      category: { name: "Shopping", color: "#8b5cf6" },
-      description: "New running shoes",
-      amount: -7800.0,
-    },
-  ];
+  ]);
 
   const transactionData = [
     { heading: "This Month", amount: "42,000" },
     { heading: "Transactions", amount: "128" },
   ];
 
+  // 🔹 Form State
+  const [newExpense, setNewExpense] = useState({
+    date: "",
+    category: "",
+    description: "",
+    amount: "",
+  });
+
+  // 🔹 Submit Handler
+  const handleAddExpense = () => {
+    if (
+      !newExpense.date ||
+      !newExpense.category ||
+      !newExpense.description ||
+      !newExpense.amount
+    ) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const expenseObj = {
+      date: newExpense.date,
+      category: { name: newExpense.category, color: "#3b82f6" }, // default blue
+      description: newExpense.description,
+      amount: parseFloat(newExpense.amount),
+    };
+
+    setExpensesData([expenseObj, ...expensesData]); // add new at top
+    setNewExpense({ date: "", category: "", description: "", amount: "" }); // reset form
+  };
+
   return (
     <main>
       <section>
         <div className="mt-10 ml-7 flex justify-between p-3">
           <h1 className="text-3xl font-bold">Expenses</h1>
-          <Button>New Expense</Button>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>New Expense</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Expense</DialogTitle>
+                <DialogDescription>
+                  Fill in the details of your expense below.
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* Expense Form */}
+              <div className="flex flex-col gap-4 mt-4">
+                <input
+                  type="date"
+                  value={newExpense.date}
+                  onChange={(e) =>
+                    setNewExpense({ ...newExpense, date: e.target.value })
+                  }
+                  className="border rounded-md p-2"
+                />
+                <input
+                  type="text"
+                  placeholder="Category"
+                  value={newExpense.category}
+                  onChange={(e) =>
+                    setNewExpense({ ...newExpense, category: e.target.value })
+                  }
+                  className="border rounded-md p-2"
+                />
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  value={newExpense.amount}
+                  onChange={(e) =>
+                    setNewExpense({ ...newExpense, amount: e.target.value })
+                  }
+                  className="border rounded-md p-2"
+                />
+                <textarea
+                  placeholder="Description"
+                  value={newExpense.description}
+                  onChange={(e) =>
+                    setNewExpense({
+                      ...newExpense,
+                      description: e.target.value,
+                    })
+                  }
+                  className="border rounded-md p-2"
+                />
+                <Button onClick={handleAddExpense}>Add Expense</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
+
       <section>
         <div className="p-10">
           <Table className="w-full border border-gray-300 rounded-xl text-base overflow-hidden">
@@ -125,6 +194,7 @@ const Page = () => {
             </TableBody>
           </Table>
         </div>
+
         <div className="mt-10 grid grid-cols-2 gap-10 lg:w-[900px] lg:ml-10 2xl:w-[1500px] 2xl:ml-10 ">
           {transactionData.map((trans, idx) => (
             <Card
