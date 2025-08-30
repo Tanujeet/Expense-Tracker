@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +22,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { axiosInstance } from "@/lib/axios";
 
 const Page = () => {
+  const [categories, setCategories] = useState<any[]>([]);
   const [expensesData, setExpensesData] = useState([
     {
       date: "2025-08-28",
@@ -43,6 +45,19 @@ const Page = () => {
     { heading: "This Month", amount: "42,000" },
     { heading: "Transactions", amount: "128" },
   ];
+
+  // Backend Api Calls //
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await axiosInstance.get("/categories");
+        setCategories(res.data);
+      } catch (e) {
+        console.error("Failed to load categories", e);
+      }
+    };
+    loadCategories();
+  }, []);
 
   // 🔹 Form State
   const [newExpense, setNewExpense] = useState({
@@ -103,15 +118,21 @@ const Page = () => {
                   }
                   className="border rounded-md p-2"
                 />
-                <input
-                  type="text"
-                  placeholder="Category"
+                <select
                   value={newExpense.category}
                   onChange={(e) =>
                     setNewExpense({ ...newExpense, category: e.target.value })
                   }
                   className="border rounded-md p-2"
-                />
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat, idx) => (
+                    <option key={idx} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+
                 <input
                   type="number"
                   placeholder="Amount"
