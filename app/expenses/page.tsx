@@ -72,25 +72,57 @@ const Page = () => {
       </section>
       <section>
         <div className="p-10">
-          <Table>
+          <Table className="w-full border border-gray-300 rounded-xl text-base overflow-hidden">
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+              <TableRow className="bg-gray-100">
+                <TableHead className="w-[120px] p-3 font-semibold text-gray-700">
+                  Date
+                </TableHead>
+                <TableHead className="p-3 font-semibold text-gray-700">
+                  Category
+                </TableHead>
+                <TableHead className="p-3 font-semibold text-gray-700">
+                  Description
+                </TableHead>
+                <TableHead className="p-3 font-semibold text-gray-700 text-right">
+                  Amount
+                </TableHead>
               </TableRow>
             </TableHeader>
-            {expensesData.map((datas, idx) => (
-              <TableBody key={idx}>
-                <TableRow>
-                  <TableCell className="font-medium">{datas.date}</TableCell>
-                  <TableCell>{datas.category.name}</TableCell>
-                  <TableCell>{datas.description}</TableCell>
-                  <TableCell className="text-right">{datas.amount}</TableCell>
+
+            <TableBody>
+              {expensesData.map((datas, idx) => (
+                <TableRow
+                  key={idx}
+                  className="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <TableCell className="p-3 font-medium text-gray-800">
+                    {datas.date}
+                  </TableCell>
+                  <TableCell className="p-3">
+                    <span
+                      className="px-2 py-1 rounded-md text-white text-sm font-medium"
+                      style={{ backgroundColor: datas.category.color }}
+                    >
+                      {datas.category.name}
+                    </span>
+                  </TableCell>
+                  <TableCell className="p-3 text-gray-700">
+                    {datas.description}
+                  </TableCell>
+                  <TableCell
+                    className={`p-3 text-right font-semibold ${
+                      datas.amount < 0 ? "text-red-500" : "text-green-600"
+                    }`}
+                  >
+                    {datas.amount.toLocaleString("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                    })}
+                  </TableCell>
                 </TableRow>
-              </TableBody>
-            ))}
+              ))}
+            </TableBody>
           </Table>
         </div>
         <div className="mt-10 grid grid-cols-2 gap-10 lg:w-[900px] lg:ml-10 2xl:w-[1500px] 2xl:ml-10 ">
