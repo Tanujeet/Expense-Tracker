@@ -1,40 +1,66 @@
 "use client";
 
+import { Spinner } from "@/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { axiosInstance } from "@/lib/axios";
+import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const Page = () => {
-  const data = [
-    { heading: "Total spent this month", amount: 2000 },
-    { heading: "Total budget", amount: 25000 },
-    { heading: "Remaining balance", amount: 20000 },
-  ];
-  const datas = [
-    { name: "Food", value: 400 },
-    { name: "Rent", value: 300 },
-    { name: "Shopping", value: 300 },
-    { name: "Transport", value: 200 },
-    { name: "Entertainment", value: 100 },
-  ];
+  const [summary, setSummary] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const FetchSummary = async () => {
+      try {
+        const res = await axiosInstance.get("/summary");
+        setSummary(res.data);
+      } catch (err) {
+        console.error("Failed to fetch summary", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    FetchSummary(); // ✅ call karna zaroori hai
+  }, []);
+
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A78BFA"];
+
+  if (loading) return <Spinner />;
+
+  const cardData = [
+    { heading: "Total Spent This Month", amount: summary.totalSpentThisMonth },
+    { heading: "Total Budget", amount: summary.totalBudget },
+    { heading: "Remaining Balance", amount: summary.remainingBalance },
+  ];
+
+  const chartData = [
+    { name: "Spent", value: summary.totalSpentThisMonth },
+    { name: "Remaining", value: summary.remainingBalance },
+  ];
+
   return (
     <main>
+      {/* Summary Cards */}
       <section className="mt-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-7">
-          {data.map((datas, idx) => (
+          {cardData.map((item, idx) => (
             <div key={idx}>
               <Card>
                 <CardHeader className="font-bold text-xl">
-                  {datas.heading}
+                  {item.heading}
                 </CardHeader>
                 <CardContent>
-                  <p className="font-semibold text-2xl">{datas.amount}</p>
+                  <p className="font-semibold text-2xl">{item.amount}</p>
                 </CardContent>
               </Card>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Transactions + Chart */}
       <section className="mt-20">
         <div className="flex gap-7">
           <Card className="w-[500px]">
@@ -47,17 +73,18 @@ const Page = () => {
               <p>Card Content</p>
             </CardContent>
           </Card>
+
           <Card className="w-[400px]">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">
-                Spending by Category
+                Spending Overview
               </CardTitle>
             </CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={datas} // ✅ chart ka sahi dataset
+                    data={chartData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -65,7 +92,7 @@ const Page = () => {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {datas.map((entry, index) => (
+                    {chartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
