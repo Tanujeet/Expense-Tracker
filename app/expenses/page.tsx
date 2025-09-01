@@ -29,11 +29,22 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [summary, setSummary] = useState({
+    thisMonth: 0,
+    Totaltransactions: 0,
+  });
 
-  const transactionData = [
-    { heading: "This Month", amount: "42,000" },
-    { heading: "Transactions", amount: "128" },
-  ];
+  useEffect(() => {
+    const loadsummary = async () => {
+      try {
+        const res = await axiosInstance.get("/expenses/summary");
+        setSummary(res.data);
+      } catch (e) {
+        console.error("Failed to load summary", e);
+      }
+    };
+    loadsummary();
+  }, []);
 
   // Backend Api Calls //
   useEffect(() => {
@@ -227,21 +238,31 @@ const Page = () => {
         </div>
 
         <div className="mt-10 grid grid-cols-2 gap-10 lg:w-[900px] lg:ml-10 2xl:w-[1500px] 2xl:ml-10 ">
-          {transactionData.map((trans, idx) => (
-            <Card
-              key={idx}
-              className="transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer hover:bg-black hover:text-white"
-            >
-              <CardHeader>
-                <CardTitle className="font-black text-3xl">
-                  {trans.heading}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="font-semibold text-2xl">{trans.amount}</p>
-              </CardContent>
-            </Card>
-          ))}
+          <Card className="transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer hover:bg-black hover:text-white">
+            <CardHeader>
+              <CardTitle className="font-black text-3xl">This Month</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="font-semibold text-2xl">
+                {summary.thisMonth.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                })}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer hover:bg-black hover:text-white">
+            <CardHeader>
+              <CardTitle className="font-black text-3xl">
+                Transactions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="font-semibold text-2xl">
+                {summary.Totaltransactions}
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </main>
