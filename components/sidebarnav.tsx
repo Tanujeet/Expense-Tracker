@@ -11,7 +11,6 @@ const Sidebarnav = () => {
     { label: "Budget", href: "/budget" },
     { label: "Expenses", href: "/expenses" },
     { label: "Recurring", href: "/recurrings" },
-    { label: "Categories", href: "/categories" },
   ];
 
   return (
