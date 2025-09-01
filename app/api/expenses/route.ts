@@ -50,14 +50,32 @@ export async function POST(req: Request) {
   if (!userId) {
     return new NextResponse("Unauthorised", { status: 403 });
   }
+
   const { amount, categoryId, description, date } = await req.json();
+
   if (!amount || amount == 0) {
-    return new NextResponse("Amount must be greator thna 0", { status: 400 });
+    return new NextResponse("Amount must be greater than 0", { status: 400 });
   }
   if (!categoryId) {
     return new NextResponse("Category is required", { status: 400 });
   }
+
   try {
+    // ✅ Ensure user profile exists
+    let user = await prisma.userProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!user) {
+      user = await prisma.userProfile.create({
+        data: {
+          userId,
+          name: "Anonymous", // Clerk se name laa sakta hai agar chaahe
+          email: `${userId}@example.com`, // Clerk ka email use kar sakta hai
+        },
+      });
+    }
+
     const newExpense = await prisma.expense.create({
       data: {
         userId,
@@ -66,7 +84,9 @@ export async function POST(req: Request) {
         description: description || "",
         date: date ? new Date(date) : new Date(),
       },
+      include: { category: true }, // 👈 ye useful hai frontend display ke liye
     });
+
     return NextResponse.json(newExpense);
   } catch (e) {
     console.error("Failed to Post expense", e);

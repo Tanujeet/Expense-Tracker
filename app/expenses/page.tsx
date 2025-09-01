@@ -25,21 +25,9 @@ import {
 import { axiosInstance } from "@/lib/axios";
 
 const Page = () => {
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
-  const [expensesData, setExpensesData] = useState([
-    {
-      date: "2025-08-28",
-      category: { name: "Groceries", color: "#10b981" },
-      description: "Weekly groceries run",
-      amount: -2150.5,
-    },
-    {
-      date: "2025-08-27",
-      category: { name: "Salary", color: "#22c55e" },
-      description: "Monthly paycheck",
-      amount: 150000.0,
-    },
-  ]);
 
   const transactionData = [
     { heading: "This Month", amount: "42,000" },
@@ -47,7 +35,6 @@ const Page = () => {
   ];
 
   // Backend Api Calls //
-  // useEffect me loadCategories function me change:
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -60,6 +47,20 @@ const Page = () => {
     loadCategories();
   }, []);
 
+  useEffect(() => {
+    const getExpense = async () => {
+      try {
+        const res = await axiosInstance.get("/expenses");
+        setExpenses(res.data);
+      } catch (e) {
+        console.error("Failed to fetch expenses", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getExpense();
+  }, []);
+
   // 🔹 Form State
   const [newExpense, setNewExpense] = useState({
     date: "",
@@ -69,7 +70,7 @@ const Page = () => {
   });
 
   // 🔹 Submit Handler
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (
       !newExpense.date ||
       !newExpense.category ||
@@ -80,15 +81,19 @@ const Page = () => {
       return;
     }
 
-    const expenseObj = {
-      date: newExpense.date,
-      category: { name: newExpense.category, color: "#3b82f6" }, // default blue
-      description: newExpense.description,
-      amount: parseFloat(newExpense.amount),
-    };
+    try {
+      const res = await axiosInstance.post("/expenses", {
+        date: newExpense.date,
+        categoryId: newExpense.category, // 👈 category id bhejna
+        description: newExpense.description,
+        amount: parseFloat(newExpense.amount),
+      });
 
-    setExpensesData([expenseObj, ...expensesData]); // add new at top
-    setNewExpense({ date: "", category: "", description: "", amount: "" }); // reset form
+      setExpenses([res.data, ...expenses]); // 👈 backend response se update
+      setNewExpense({ date: "", category: "", description: "", amount: "" });
+    } catch (error) {
+      console.error("Failed to add expense", error);
+    }
   };
 
   return (
@@ -127,8 +132,8 @@ const Page = () => {
                   className="border rounded-md p-2"
                 >
                   <option value="">Select Category</option>
-                  {categories.map((cat, idx) => (
-                    <option key={idx} value={cat.name}>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>
                   ))}
@@ -182,20 +187,22 @@ const Page = () => {
             </TableHeader>
 
             <TableBody>
-              {expensesData.map((datas, idx) => (
+              {expenses.map((datas, idx) => (
                 <TableRow
                   key={idx}
                   className="transition-all duration-300 cursor-pointer hover:bg-black hover:[&>*]:text-white"
                 >
                   <TableCell className="p-3 font-medium text-gray-800">
-                    {datas.date}
+                    {new Date(datas.date).toLocaleDateString("en-IN")}
                   </TableCell>
                   <TableCell className="p-3">
                     <span
                       className="px-2 py-1 rounded-md text-white text-sm font-medium"
-                      style={{ backgroundColor: datas.category.color }}
+                      style={{
+                        backgroundColor: datas.category?.color || "#3b82f6",
+                      }}
                     >
-                      {datas.category.name}
+                      {datas.category?.name}
                     </span>
                   </TableCell>
                   <TableCell className="p-3 text-gray-700">
