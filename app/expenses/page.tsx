@@ -28,6 +28,7 @@ const Page = () => {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
 
   const transactionData = [
     { heading: "This Month", amount: "42,000" },
@@ -91,6 +92,7 @@ const Page = () => {
 
       setExpenses([res.data, ...expenses]); // 👈 backend response se update
       setNewExpense({ date: "", category: "", description: "", amount: "" });
+      setOpen(false);
     } catch (error) {
       console.error("Failed to add expense", error);
     }
