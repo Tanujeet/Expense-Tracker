@@ -85,12 +85,12 @@ const Page = () => {
     try {
       const res = await axiosInstance.post("/expenses", {
         date: newExpense.date,
-        categoryId: newExpense.category, // 👈 category id bhejna
+        categoryId: newExpense.category,
         description: newExpense.description,
         amount: parseFloat(newExpense.amount),
       });
 
-      setExpenses([res.data, ...expenses]); // 👈 backend response se update
+      setExpenses([res.data, ...expenses]);
       setNewExpense({ date: "", category: "", description: "", amount: "" });
       setOpen(false);
     } catch (error) {
