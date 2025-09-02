@@ -5,7 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 const Page = () => {
   const recurringExpenseData = [
     {
@@ -36,7 +43,20 @@ const Page = () => {
       <section>
         <div className="mt-10 ml-7 flex justify-between">
           <h1 className="text-3xl  font-bold ">Recurring Expenses</h1>
-          <Button>New Recurring Expense</Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>New Recurring Expense</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </div>
         <div className="mt-6 space-y-3">
           {recurringExpenseData.map((datas, idx) => (
