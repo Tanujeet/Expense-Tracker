@@ -34,7 +34,7 @@ const Page = () => {
   return (
     <main>
       <section>
-        <div className="mt-10 ml-7">
+        <div className="mt-10 ml-7 flex justify-between">
           <h1 className="text-3xl  font-bold ">Recurring Expenses</h1>
           <Button>New Recurring Expense</Button>
         </div>
