@@ -20,14 +20,14 @@ const Page = () => {
       Interval: "Month",
       Amount: "20,000",
       date: "17/06",
-      status: "Actove",
+      status: "Active",
     },
     {
       Title: "Rent",
       Interval: "Month",
       Amount: "20,000",
       date: "17/06",
-      status: "Actove",
+      status: "Active",
     },
   ];
 
