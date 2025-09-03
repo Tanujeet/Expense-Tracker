@@ -63,15 +63,16 @@ const Page = () => {
               </DialogHeader>
 
               {/* {form} */}
-              <div>
+              <div className="space-y-4">
+                {/* Amount & Category */}
                 <div className="flex gap-4">
                   <input
                     type="number"
                     placeholder="Amount"
-                    className="border rounded-md p-1"
+                    className="border rounded-md p-3 w-full"
                   />
                   <Select>
-                    <SelectTrigger className="w-[180px] p-3">
+                    <SelectTrigger className="w-full p-3">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -85,14 +86,16 @@ const Page = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="mt-4">
+
+                {/* Description & Interval */}
+                <div className="flex gap-4">
                   <input
                     type="text"
-                    placeholder="Descritpion"
-                    className="border rounded-md p-3 w-[387px]"
+                    placeholder="Description"
+                    className="border rounded-md p-3 w-full"
                   />
                   <Select>
-                    <SelectTrigger className="w-[387px] p-3 mt-4 ">
+                    <SelectTrigger className="w-full p-3">
                       <SelectValue placeholder="Interval" />
                     </SelectTrigger>
                     <SelectContent>
@@ -103,9 +106,19 @@ const Page = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="mt-4 flex gap-4 ">
-                  <input type="date" className="border rounded-md p-2" />
-                  <input type="date" className="border rounded-md p-2" />
+
+                {/* Dates */}
+                <div className="flex gap-4">
+                  <input
+                    type="date"
+                    className="border rounded-md p-3 w-full"
+                    placeholder="Start Date"
+                  />
+                  <input
+                    type="date"
+                    className="border rounded-md p-3 w-full"
+                    placeholder="End Date"
+                  />
                 </div>
               </div>
             </DialogContent>
