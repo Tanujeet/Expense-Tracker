@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 const Page = () => {
   const recurringExpenseData = [
     {
@@ -45,6 +48,19 @@ const Page = () => {
     },
   ];
 
+  // use States
+  const [amount, setAmount] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [description, setDescription] = useState("");
+  const [interval, setInterval] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleSave = async () => {
+    try {
+    } catch (e) {}
+  };
+
   return (
     <main>
       <section>
@@ -64,14 +80,15 @@ const Page = () => {
 
               {/* {form} */}
               <div className="space-y-4">
-                {/* Amount & Category */}
                 <div className="flex gap-4">
                   <input
                     type="number"
                     placeholder="Amount"
                     className="border rounded-md p-3 w-full"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
                   />
-                  <Select>
+                  <Select onValueChange={setCategoryId}>
                     <SelectTrigger className="w-full p-3">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
@@ -93,16 +110,19 @@ const Page = () => {
                     type="text"
                     placeholder="Description"
                     className="border rounded-md p-3 w-full"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
-                  <Select>
+
+                  <Select onValueChange={setInterval}>
                     <SelectTrigger className="w-full p-3">
                       <SelectValue placeholder="Interval" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Daily">Daily</SelectItem>
-                      <SelectItem value="Weekly">Weekly</SelectItem>
-                      <SelectItem value="Monthly">Monthly</SelectItem>
-                      <SelectItem value="Yearly">Yearly</SelectItem>
+                      <SelectItem value="DAILY">Daily</SelectItem>
+                      <SelectItem value="WEEKLY">Weekly</SelectItem>
+                      <SelectItem value="MONTHLY">Monthly</SelectItem>
+                      <SelectItem value="YEARLY">Yearly</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -111,17 +131,20 @@ const Page = () => {
                 <div className="flex gap-4">
                   <input
                     type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
                     className="border rounded-md p-3 w-full"
-                    placeholder="Start Date"
                   />
+
                   <input
                     type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
                     className="border rounded-md p-3 w-full"
-                    placeholder="End Date"
                   />
                 </div>
               </div>
-              <Button className="w-full mt-4" type="submit">
+              <Button className="w-full mt-4" onClick={handleSave}>
                 Save Expense
               </Button>
             </DialogContent>
