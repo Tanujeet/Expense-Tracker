@@ -13,6 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 const Page = () => {
   const recurringExpenseData = [
     {
@@ -56,6 +63,51 @@ const Page = () => {
               </DialogHeader>
 
               {/* {form} */}
+              <div>
+                <div className="flex gap-4">
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    className="border rounded-md p-1"
+                  />
+                  <Select>
+                    <SelectTrigger className="w-[180px] p-3">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="food">Food</SelectItem>
+                      <SelectItem value="transport">Transport</SelectItem>
+                      <SelectItem value="shopping">Shopping</SelectItem>
+                      <SelectItem value="billing">Billing</SelectItem>
+                      <SelectItem value="entertainment">
+                        Entertainment
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-4">
+                  <input
+                    type="text"
+                    placeholder="Descritpion"
+                    className="border rounded-md p-3 w-[387px]"
+                  />
+                  <Select>
+                    <SelectTrigger className="w-[387px] p-3 mt-4 ">
+                      <SelectValue placeholder="Interval" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Daily">Daily</SelectItem>
+                      <SelectItem value="Weekly">Weekly</SelectItem>
+                      <SelectItem value="Monthly">Monthly</SelectItem>
+                      <SelectItem value="Yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-4 flex gap-4 ">
+                  <input type="date" className="border rounded-md p-2" />
+                  <input type="date" className="border rounded-md p-2" />
+                </div>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
