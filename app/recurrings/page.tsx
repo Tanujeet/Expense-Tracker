@@ -121,6 +121,9 @@ const Page = () => {
                   />
                 </div>
               </div>
+              <Button className="w-full mt-4" type="submit">
+                Save Expense
+              </Button>
             </DialogContent>
           </Dialog>
         </div>

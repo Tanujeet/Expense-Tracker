@@ -51,7 +51,7 @@ model RecurringExpense {
   amount      Float
   categoryId  String
   description String?
-  interval    String
+  interval    Interval
   startDate   DateTime
   endDate     DateTime?
   createdAt   DateTime  @default(now())
@@ -70,4 +70,12 @@ model Budget {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   category   Category @relation(fields: [categoryId], references: [id])
+}
+
+
+enum Interval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
 }
