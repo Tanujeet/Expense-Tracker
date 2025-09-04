@@ -9,19 +9,15 @@ export async function GET() {
   }
 
   try {
-    // total budget (budgets ka sum)
-    const totalBudgetAggregate = await prisma.budget.aggregate({
-      _sum: { limit: true },
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // 🔹 Total transactions
+    const totalTransactions = await prisma.expense.count({
       where: { userId },
     });
-    const totalBudget = totalBudgetAggregate._sum.limit || 0;
 
-    // total spent this month
-    const startOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
+    // 🔹 This month spent
     const totalSpentThisMonth = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: {
@@ -30,12 +26,9 @@ export async function GET() {
       },
     });
 
-    const spent = totalSpentThisMonth._sum.amount || 0;
-
     return NextResponse.json({
-      totalBudget,
-      totalSpentThisMonth: spent,
-      remainingBalance: totalBudget - spent,
+      thisMonth: totalSpentThisMonth._sum.amount || 0,
+      Totaltransactions: totalTransactions,
     });
   } catch (e) {
     console.error("Failed to get summary", e);
