@@ -22,7 +22,7 @@ const Page = () => {
       }
     };
 
-    FetchSummary(); // ✅ call karna zaroori hai
+    FetchSummary();
   }, []);
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A78BFA"];
@@ -62,7 +62,8 @@ const Page = () => {
 
       {/* Transactions + Chart */}
       <section className="mt-20">
-        <div className="flex gap-7">
+        <div className="flex gap-7 flex-wrap">
+          {/* Recent Transactions */}
           <Card className="w-[500px]">
             <CardHeader>
               <CardTitle className="font-bold text-2xl">
@@ -70,10 +71,40 @@ const Page = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Card Content</p>
+              {summary.recentTransactions?.length > 0 ? (
+                <ul className="space-y-4">
+                  {summary.recentTransactions.map((tx: any) => (
+                    <li
+                      key={tx.id}
+                      className="flex justify-between items-center border-b pb-2"
+                    >
+                      <div>
+                        <p className="font-medium">
+                          {tx.description || "No description"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {tx.category} • {tx.type}
+                        </p>
+                      </div>
+                      <span
+                        className={`font-semibold ${
+                          tx.type === "expense"
+                            ? "text-red-500"
+                            : "text-blue-500"
+                        }`}
+                      >
+                        ₹{tx.amount}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">No transactions found.</p>
+              )}
             </CardContent>
           </Card>
 
+          {/* Spending Overview */}
           <Card className="w-[400px]">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">
