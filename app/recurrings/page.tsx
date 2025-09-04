@@ -22,32 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { axiosInstance } from "@/lib/axios";
+import { useEffect, useState } from "react";
 const Page = () => {
-  const recurringExpenseData = [
-    {
-      Title: "Rent",
-      Interval: "Month",
-      Amount: "20,000",
-      date: "17/06",
-      status: "Active",
-    },
-    {
-      Title: "Rent",
-      Interval: "Month",
-      Amount: "20,000",
-      date: "17/06",
-      status: "Active",
-    },
-    {
-      Title: "Rent",
-      Interval: "Month",
-      Amount: "20,000",
-      date: "17/06",
-      status: "Active",
-    },
-  ];
-
   // use States
   const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -55,10 +32,56 @@ const Page = () => {
   const [interval, setInterval] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [recurringExpenses, setRecurringExpenses] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  // Api Calls
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axiosInstance.get("/recurring");
+        setRecurringExpenses(res.data);
+      } catch (e) {
+        console.error("Failed to fetch recurring expenses", e);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await axiosInstance.get("/categories");
+        setCategories(res.data.data); // ✅ directly categories array set kar
+      } catch (e) {
+        console.error("Failed to load categories", e);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const handleSave = async () => {
     try {
-    } catch (e) {}
+      const res = await axiosInstance.post("/recurring", {
+        amount: parseFloat(amount),
+        categoryId,
+        description,
+        interval,
+        startDate,
+        endDate: endDate || null,
+      });
+      console.log("✅ Saved:", res.data);
+
+      setRecurringExpenses((prev) => [...prev, res.data]);
+      setAmount("");
+      setCategoryId("");
+      setDescription("");
+      setInterval("");
+      setStartDate("");
+      setEndDate("");
+    } catch (e) {
+      console.error("❌ Error saving expense:", e);
+    }
   };
 
   return (
@@ -89,18 +112,11 @@ const Page = () => {
                     onChange={(e) => setAmount(e.target.value)}
                   />
                   <Select onValueChange={setCategoryId}>
-                    <SelectTrigger className="w-full p-3">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="food">Food</SelectItem>
-                      <SelectItem value="transport">Transport</SelectItem>
-                      <SelectItem value="shopping">Shopping</SelectItem>
-                      <SelectItem value="billing">Billing</SelectItem>
-                      <SelectItem value="entertainment">
-                        Entertainment
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
                       </SelectItem>
-                    </SelectContent>
+                    ))}
                   </Select>
                 </div>
 
@@ -151,33 +167,25 @@ const Page = () => {
           </Dialog>
         </div>
         <div className="mt-6 space-y-3">
-          {recurringExpenseData.map((datas, idx) => (
+          {recurringExpenses.map((datas, idx) => (
             <Card
               key={idx}
-              className="hover:text-white hover:bg-black hover:scale-102 hover:transition-all 2s"
+              className="hover:text-white hover:bg-black hover:scale-102 hover:transition-all"
             >
               <CardHeader className="flex justify-between items-center">
-                {/* Left side */}
                 <div>
-                  <CardTitle>{datas.Title}</CardTitle>
-                  <CardDescription>{datas.Interval}</CardDescription>
+                  <CardTitle>
+                    {datas.description || datas.category?.name}
+                  </CardTitle>
+                  <CardDescription>{datas.interval}</CardDescription>
                 </div>
 
-                {/* Right side */}
                 <div className="flex items-center gap-4 text-sm">
-                  <p className="font-semibold">₹{datas.Amount}</p>
-                  <p className="text-muted-foreground">{datas.date}</p>
-                  <p
-                    className={`font-medium ${
-                      datas.status === "Paid"
-                        ? "text-green-600"
-                        : datas.status === "Pending"
-                        ? "text-yellow-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {datas.status}
+                  <p className="font-semibold">₹{datas.amount}</p>
+                  <p className="text-muted-foreground">
+                    {new Date(datas.startDate).toLocaleDateString()}
                   </p>
+                  <p className="font-medium text-green-600">Active</p>
                 </div>
               </CardHeader>
             </Card>
