@@ -72,13 +72,13 @@ export default function BudgetDashboard() {
     },
   });
 
-  const { data: categories } = useQuery<{ id: string; name: string }[]>({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await axiosInstance.get("/categories");
-      return res.data;
-    },
-  });
+const { data: categories } = useQuery<{ id: string; name: string }[]>({
+  queryKey: ["categories"],
+  queryFn: async () => {
+    const res = await axiosInstance.get("/categories");
+    return res.data.data; // ✅ ye array hai
+  },
+});
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<DialogMode>("add");

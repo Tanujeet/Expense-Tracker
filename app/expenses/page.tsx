@@ -115,7 +115,7 @@ const Page = () => {
         <div className="mt-10 ml-7 flex justify-between p-3">
           <h1 className="text-3xl font-bold">Expenses</h1>
 
-          <Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>New Expense</Button>
             </DialogTrigger>
@@ -200,39 +200,50 @@ const Page = () => {
             </TableHeader>
 
             <TableBody>
-              {expenses.map((datas, idx) => (
-                <TableRow
-                  key={idx}
-                  className="transition-all duration-300 cursor-pointer hover:bg-black hover:[&>*]:text-white"
-                >
-                  <TableCell className="p-3 font-medium text-gray-800">
-                    {new Date(datas.date).toLocaleDateString("en-IN")}
-                  </TableCell>
-                  <TableCell className="p-3">
-                    <span
-                      className="px-2 py-1 rounded-md text-white text-sm font-medium"
-                      style={{
-                        backgroundColor: datas.category?.color || "#3b82f6",
-                      }}
-                    >
-                      {datas.category?.name}
-                    </span>
-                  </TableCell>
-                  <TableCell className="p-3 text-gray-700">
-                    {datas.description}
-                  </TableCell>
+              {expenses.length === 0 ? (
+                <TableRow>
                   <TableCell
-                    className={`p-3 text-right font-semibold ${
-                      datas.amount < 0 ? "text-red-500" : "text-green-600"
-                    }`}
+                    colSpan={4}
+                    className="text-center text-gray-500 p-5"
                   >
-                    {datas.amount.toLocaleString("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                    })}
+                    No expenses found. Add your first one!
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                expenses.map((datas, idx) => (
+                  <TableRow
+                    key={idx}
+                    className="transition-all duration-300 cursor-pointer hover:bg-black hover:[&>*]:text-white"
+                  >
+                    <TableCell className="p-3 font-medium text-gray-800">
+                      {new Date(datas.date).toLocaleDateString("en-IN")}
+                    </TableCell>
+                    <TableCell className="p-3">
+                      <span
+                        className="px-2 py-1 rounded-md text-white text-sm font-medium"
+                        style={{
+                          backgroundColor: datas.category?.color || "#3b82f6",
+                        }}
+                      >
+                        {datas.category?.name}
+                      </span>
+                    </TableCell>
+                    <TableCell className="p-3 text-gray-700">
+                      {datas.description}
+                    </TableCell>
+                    <TableCell
+                      className={`p-3 text-right font-semibold ${
+                        datas.amount < 0 ? "text-red-500" : "text-green-600"
+                      }`}
+                    >
+                      {datas.amount.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                      })}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
