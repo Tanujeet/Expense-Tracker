@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,9 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
   Dialog,
   DialogContent,
@@ -24,12 +21,32 @@ import {
 } from "@/components/ui/dialog";
 import { axiosInstance } from "@/lib/axios";
 
+// ✅ Interfaces banado
+interface Category {
+  id: string;
+  name: string;
+  color?: string;
+}
+
+interface Expense {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  category?: Category;
+}
+
+interface Summary {
+  thisMonth: number;
+  Totaltransactions: number;
+}
+
 const Page = () => {
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true); // ✅ correct state
+  const [categories, setCategories] = useState<Category[]>([]);
   const [open, setOpen] = useState(false);
-  const [summary, setSummary] = useState({
+  const [summary, setSummary] = useState<Summary>({
     thisMonth: 0,
     Totaltransactions: 0,
   });
@@ -37,7 +54,7 @@ const Page = () => {
   useEffect(() => {
     const loadsummary = async () => {
       try {
-        const res = await axiosInstance.get("/expenses/summary");
+        const res = await axiosInstance.get<Summary>("/expenses/summary");
         setSummary(res.data);
       } catch (e) {
         console.error("Failed to load summary", e);
@@ -46,12 +63,13 @@ const Page = () => {
     loadsummary();
   }, []);
 
-  // Backend Api Calls //
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const res = await axiosInstance.get("/categories");
-        setCategories(res.data.data); // ✅ directly categories array set kar
+        const res = await axiosInstance.get<{ data: Category[] }>(
+          "/categories"
+        );
+        setCategories(res.data.data);
       } catch (e) {
         console.error("Failed to load categories", e);
       }
@@ -62,7 +80,7 @@ const Page = () => {
   useEffect(() => {
     const getExpense = async () => {
       try {
-        const res = await axiosInstance.get("/expenses");
+        const res = await axiosInstance.get<Expense[]>("/expenses");
         setExpenses(res.data);
       } catch (e) {
         console.error("Failed to fetch expenses", e);
@@ -73,7 +91,6 @@ const Page = () => {
     getExpense();
   }, []);
 
-  // 🔹 Form State
   const [newExpense, setNewExpense] = useState({
     date: "",
     category: "",
@@ -81,7 +98,6 @@ const Page = () => {
     amount: "",
   });
 
-  // 🔹 Submit Handler
   const handleAddExpense = async () => {
     if (
       !newExpense.date ||
@@ -94,7 +110,7 @@ const Page = () => {
     }
 
     try {
-      const res = await axiosInstance.post("/expenses", {
+      const res = await axiosInstance.post<Expense>("/expenses", {
         date: newExpense.date,
         categoryId: newExpense.category,
         description: newExpense.description,
@@ -108,7 +124,6 @@ const Page = () => {
       console.error("Failed to add expense", error);
     }
   };
-
   return (
     <main>
       <section>
